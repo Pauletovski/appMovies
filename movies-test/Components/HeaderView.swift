@@ -91,3 +91,9 @@ struct SearchBar: View {
         .padding(.horizontal)
     }
 }
+
+struct HeaderView_Previews: PreviewProvider {
+    static var previews: some View {
+        FavoriteView(viewModel: MainViewModel(networkProvider: NetworkManager()), coordinator: Coordinator(navigationController: UINavigationController()))
+    }
+}

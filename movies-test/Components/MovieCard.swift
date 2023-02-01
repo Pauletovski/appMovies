@@ -34,23 +34,24 @@ struct MovieCard: View {
                     LazyImage(source: URL(string: "https://image.tmdb.org/t/p/w500\(image)"))
                 }
                 .sheet(isPresented: $showBottomSheet) {
-                    BottomSheet(image: self.image, title: self.text, id: self.id, overview: self.overview, releaseDate: self.releaseDate)
+                    BottomSheet(image: self.image, title: self.text, id: self.id, overview: self.overview, releaseDate: self.releaseDate, isFavorite: isFavorite, toggleFavorite: toggleFavorite)
                         .presentationDetents([.large])
                         .presentationDragIndicator(.visible)
+                        .onChange(of: showBottomSheet) { newValue in
+                            isFavorite = newValue
+                        }
                 }
             }
 
             
             ZStack(alignment: .center) {
-                Color.gray
+                Color.gray.opacity(0.5)
                 HStack {
 
                     Text(text)
                         .bold()
                         .padding(.leading)
                 
-
-                    
                     Spacer()
                     
                     Button {

@@ -12,21 +12,23 @@ class MainViewData {
     
     let movies: [MovieViewData]? = nil
     
-    struct MovieViewData: Equatable {
+    struct MovieViewData: Equatable, Identifiable {
         var title: String
         var id: Int
         var poster_path: String
         var overview: String
         var release_date: String
         var favorite: Bool
+        var genre_ids: [Int]
         
-        init(title: String, id: Int, poster_path: String, overview: String, release_date: String, favorite: Bool) {
+        init(title: String, id: Int, poster_path: String, overview: String, release_date: String, favorite: Bool, genre_ids: [Int]) {
             self.title = title
             self.id = id
             self.poster_path = poster_path
             self.overview = overview
             self.release_date = release_date
             self.favorite = favorite
+            self.genre_ids = genre_ids
         }
     }
 }
@@ -44,17 +46,23 @@ struct MainView: View {
                 
                 Spacer()
                 
-                if viewModel.movieSearchedResult.isEmpty {
-                    if viewModel.searchText == "" {
-                        MovieGridView(viewModel: viewModel)
-                    } else {
-                        NotFound(viewModel: viewModel)
-                    }
+                if viewModel.error {
+                    ErrorOcurred()
                 } else {
-                    ResultMovieGridView(viewModel: viewModel)
+                    if viewModel.movieSearchedResult.isEmpty {
+                        if viewModel.searchText == "" {
+                            MovieGridView(viewModel: viewModel)
+                        } else {
+                            NotFound(viewModel: viewModel)
+                        }
+                    } else {
+                        ResultMovieGridView(viewModel: viewModel)
+                    }
                 }
                 
                 Spacer()
+                
+
                 
                 FooterView(viewModel: viewModel, coordinator: coordinator)
             }

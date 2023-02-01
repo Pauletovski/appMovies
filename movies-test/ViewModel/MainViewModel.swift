@@ -8,37 +8,52 @@
 import Foundation
 import Combine
 import SwiftUI
-//import Moya
+
 
 class MainViewModel: ObservableObject {
 
     let movieSearched = PassthroughSubject<String, Never>()
     let searchTextSubject = PassthroughSubject<String, Never>()
+    var error = false
     var cancelSet = Set<AnyCancellable>()
     let networkProvider: Networkable
     
     init(networkProvider: Networkable) {
         self.networkProvider = networkProvider
         
-        getNewMovies()
+        getNewMovies(page: pageOption)
+        getGenreList()
         getResultMovies()
         getFavoriteMovies()
         getResultMoviesFavorite()
         getText()
-    
     }
     
     @Published var movieSearchedResult: [MainViewData.MovieViewData] = []
     @Published var movieSearchedResultFavorite: [MainViewData.MovieViewData] = []
     @Published var moviesViewData: [MainViewData.MovieViewData] = []
     @Published var onlyFavoriteMovies: [MainViewData.MovieViewData] = []
+    @Published var dateMovieList: [MainViewData.MovieViewData] = []
+    @Published var genreMovieList: [MainViewData.MovieViewData] = []
+    @Published var genreList: [Genre] = []
     @Published var searchText = ""
+    @Published var hasFilter = false
+    @Published var pageOption = 1
     
-    func getNewMovies() {
-        networkProvider.getNewMovies(page: 1) { movies in
+    func getNewMovies(page: Int) {
+        networkProvider.getNewMovies(page: page) { movies in
             self.moviesViewData = []
             movies.forEach { Movie in
-                self.moviesViewData.append(MainViewData.MovieViewData(title: Movie.title, id: Movie.id, poster_path: Movie.poster_path, overview: Movie.overview, release_date: Movie.release_date, favorite: false))
+                self.moviesViewData.append(MainViewData.MovieViewData(title: Movie.title, id: Movie.id, poster_path: Movie.poster_path, overview: Movie.overview, release_date: Movie.release_date, favorite: true, genre_ids: Movie.genre_ids))
+            }
+        }
+    }
+    
+    func getGenreList() {
+        networkProvider.getGenreList { genres in
+            self.genreList = []
+            genres.forEach { genre in
+                self.genreList.append(Genre(id: genre.id, name: genre.name))
             }
         }
     }
@@ -48,6 +63,7 @@ class MainViewModel: ObservableObject {
         var favoriteMovies: [MainViewData.MovieViewData] = []
         
         self.moviesViewData.forEach { movie in
+            self.onlyFavoriteMovies = []
             if movie.favorite == true {
                 favoriteMovies.append(movie)
             }
@@ -118,7 +134,10 @@ class MainViewModel: ObservableObject {
         )
         
         view.toggleFavorite.sink { value in
-            self.onlyFavoriteMovies[index].favorite = value
+            if let movieIndex = self.moviesViewData.firstIndex(where: { $0.id == self.onlyFavoriteMovies[index].id }) {
+                self.moviesViewData[movieIndex].favorite = value
+            }
+            self.onlyFavoriteMovies.remove(at: index)
         }
         .store(in: &cancelSet)
         
@@ -137,7 +156,9 @@ class MainViewModel: ObservableObject {
         )
         
         view.toggleFavorite.sink { value in
-            self.movieSearchedResult[index].favorite = value
+            if let movieIndex = self.moviesViewData.firstIndex(where: { $0.id == self.movieSearchedResult[index].id }) {
+                self.moviesViewData[movieIndex].favorite = value
+            }
         }
         .store(in: &cancelSet)
         
@@ -156,7 +177,9 @@ class MainViewModel: ObservableObject {
         )
         
         view.toggleFavorite.sink { value in
-            self.movieSearchedResultFavorite[index].favorite = value
+            if let movieIndex = self.moviesViewData.firstIndex(where: { $0.id == self.movieSearchedResultFavorite[index].id }) {
+                self.moviesViewData[movieIndex].favorite = value
+            }
         }
         .store(in: &cancelSet)
         

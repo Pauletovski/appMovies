@@ -11,14 +11,16 @@ import Moya
 
 enum NetworkRequest {
     case getMovies(page: Int)
+    case getGenre
 }
 
 extension NetworkRequest: TargetType {
     
+    static let MovieAPIKey = "9f041eb26e51673e9eb8ba9e63adb9fe"
+    
     var enviromentBaseURL: String {
         switch NetworkManager.enviroment {
-        case.popularMovie: return "https://api.themoviedb.org"
-        case.listMovie: return "https://api.themoviedb.org"
+        case.popularMovie: return "https://api.themoviedb.org/3"
         }
     }
     
@@ -30,7 +32,9 @@ extension NetworkRequest: TargetType {
     var path: String {
         switch self {
         case .getMovies:
-            return "3/movie/popular"
+            return "/movie/popular"
+        case .getGenre:
+            return "/genre/movie/list"
         }
     }
     
@@ -44,8 +48,15 @@ extension NetworkRequest: TargetType {
     
     var task: Task {
         switch self {
-        case .getMovies:
-            return .requestParameters(parameters: ["api_key" : "9f041eb26e51673e9eb8ba9e63adb9fe", "language" : "en-US", "page" : "1"], encoding: URLEncoding.queryString)
+        case .getMovies(let page):
+            return .requestParameters(parameters: ["api_key" : "\(NetworkRequest.MovieAPIKey)",
+                                              "language" : "en-US",
+                                              "page" : "\(page)"],
+                                              encoding: URLEncoding.queryString)
+        case .getGenre:
+            return .requestParameters(parameters: ["api_key" : "\(NetworkRequest.MovieAPIKey)",
+                                              "language" : "en-US"],
+                                              encoding: URLEncoding.queryString)
         }
     }
     

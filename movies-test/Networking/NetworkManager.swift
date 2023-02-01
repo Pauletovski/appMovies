@@ -6,20 +6,38 @@
 //
 
 import Foundation
+import Combine
 import Moya
 
 protocol Networkable {
     var provider: MoyaProvider<NetworkRequest> { get }
     func getNewMovies(page: Int, completion: @escaping ([Movie]) -> ())
+    func getGenreList(completion: @escaping ([Genre]) -> ())
 }
 
 enum APIEnviroment {
     case popularMovie
-    case listMovie
+//    case listMovie
 }
 
 struct NetworkManager: Networkable {
-    static let MovieAPIKey = "9f041eb26e51673e9eb8ba9e63adb9fe"
+    func getGenreList(completion: @escaping ([Genre]) -> ()) {
+        provider.request(.getGenre) { result in
+            switch result {
+            case let .success(response):
+                do {
+                    let results = try JSONDecoder().decode(Genres.self, from: response.data)
+                    completion(results.genres)
+                } catch let err {
+                    print(err)
+
+                }
+            case let .failure(error):
+                print(error)
+            }
+        }
+    }
+    
     var provider = MoyaProvider<NetworkRequest>()
     static let enviroment: APIEnviroment = .popularMovie
     
@@ -32,6 +50,7 @@ struct NetworkManager: Networkable {
                     completion(results.results)
                 } catch let err {
                     print(err)
+
                 }
             case let .failure(error):
                 print(error)

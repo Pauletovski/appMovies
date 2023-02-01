@@ -26,8 +26,28 @@ class Coordinator {
     }
     
     func presentFavoriteMovie() {
-        let view = FavoriteView(viewModel: viewModel, coordinator: self, searchText: "")
+        let view = FavoriteView(viewModel: viewModel, searchText: "", coordinator: self)
         
+        let vc = UIHostingController(rootView: view)
+        navigationController.pushViewController(vc, animated: false)
+    }
+    
+    func presentFilter() {
+        let view = Filter(viewModel: viewModel, coordinator: self)
+        
+        let vc = UIHostingController(rootView: view)
+        navigationController.pushViewController(vc, animated: false)
+    }
+    
+    func presentFilterGenre() {
+        let view = FilterGenre(viewModel: viewModel, coordinator: self)
+        
+        let vc = UIHostingController(rootView: view)
+        navigationController.pushViewController(vc, animated: false)
+    }
+    
+    func presentFilterDate() {
+        let view = FilterDate(viewModel: viewModel, coordinator: self)
         
         let vc = UIHostingController(rootView: view)
         navigationController.pushViewController(vc, animated: false)
